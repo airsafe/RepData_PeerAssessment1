@@ -1,9 +1,4 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 
 
 **Loading and preprocessing the data**
@@ -11,7 +6,8 @@ output:
 The first step was to download and unzip dataset file 'activity.csv', and put 
 it into an object called 'rawdata'.
 
-```{r, echo=TRUE}
+
+```r
 rawdata <- read.csv("activity.csv")
 ```
 Did a bit of exploratory work on the rawdata file and found that the 'steps' column had 15,264 valid values (53 days x 288 five-minute intervals per day), and that the other columns had 17,568 valid values, which is equal to the number of rows in the 'rawdata' object. 
@@ -22,7 +18,8 @@ Will ignore the missing values and will extract only the rows with valid data in
 
 1. Make a histogram of the total number of steps taken each day.
 
-```{r, echo=TRUE}
+
+```r
 # Table below contains only those observations that included a value for steps taken
 valid_data <- rawdata[!is.na(rawdata$steps),]
 rownames(valid_data) <- NULL
@@ -34,14 +31,20 @@ valid_data$date <- as.character(valid_data$date)
 daily.steps <- sapply(split(valid_data$steps,valid_data$date),sum)
 
 barplot(daily.steps , xlab="Dates", ylab="Steps", col="blue", main="Total steps by day")
-
 ```
 
-```{r, echo=TRUE}
+![](PA1_template_files/figure-html/unnamed-chunk-2-1.png) 
+
+
+```r
 # Mean and median daily steps steps with rows with NA values removed
 meansteps <- mean(daily.steps)
 mediansteps <- median(daily.steps)
 paste("The mean number of steps per day is ",round(meansteps,digits=2), ", and the median is ",mediansteps,".",sep="")
+```
+
+```
+## [1] "The mean number of steps per day is 10766.19, and the median is 10765."
 ```
 
 **What is the average daily activity pattern?**
@@ -49,7 +52,8 @@ paste("The mean number of steps per day is ",round(meansteps,digits=2), ", and t
 The data is measured during five-minute intervals throughout the day, so there were 288 unique sampling periods (24 hours x 12 five-minute periods per hour).
 
 1. Make a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
-```{r, echo=TRUE}
+
+```r
 # Will use sapply and split to creates mean number of steps and total steps for each five-minute time interval.
 
 interval.means  <- sapply(split(valid_data$steps,valid_data$interval),mean)
@@ -60,13 +64,18 @@ interval.totals <- sapply(split(valid_data$steps,valid_data$interval),sum)
 x.axis <- sort(unique(valid_data$interval)) 
 
 plot(x.axis,interval.means,type="l", main="Average steps for each time interval",xlab="Time interval",ylab="Average steps")
-
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-4-1.png) 
+
 2. Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
-```{r, echo=TRUE}        
+
+```r
 paste("The maximum number of steps,",max(interval.totals), ", occurs during five-minute interval starting at",names(which.max(interval.totals)),sep=" ")
-        
+```
+
+```
+## [1] "The maximum number of steps, 10927 , occurs during five-minute interval starting at 835"
 ```
 
 **Imputing missing values**
@@ -75,11 +84,15 @@ Note that there are a number of days/intervals where there are missing values (c
 
 1. Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs)
 
-```{r, echo=TRUE}
 
+```r
 # Print out number of elements in the 'steps', 'date', and 'interval' columns that have NA values
 
 paste("In this dataset, there are ",sum(is.na( rawdata$steps))," 'NA' values in the 'steps' column ", sum(is.na(rawdata$date))," 'NA' values in the 'date' column, and ", sum(is.na( rawdata$interval))," 'NA' values in the 'inteval' column",sep="")
+```
+
+```
+## [1] "In this dataset, there are 2304 'NA' values in the 'steps' column 0 'NA' values in the 'date' column, and 0 'NA' values in the 'inteval' column"
 ```
 
 2. Devise a strategy for filling in all of the missing values in the dataset. 
@@ -88,7 +101,8 @@ Since only the 'steps' column has NA values, the strategy for dealing these miss
 
 3. Create a new dataset that is equal to the original dataset but with the missing data filled in.
 
-```{r, echo=TRUE}
+
+```r
 # Will use mean steps per interval (from interval.means object of class 'by') created earlier to replace missing values. Will first create a data frame object means.df with time intervals and mean steps for each interval
 means.df <-cbind(as.numeric(names(interval.means)),interval.means)
 means.df <- as.data.frame(means.df, row.names=FALSE)
@@ -104,13 +118,13 @@ filled_data <- rawdata
  for (i in 1:nrow(filled_data)){
  if(is.na(filled_data$steps[i])){ filled_data$steps[i] <- means.df[means.df$interval.id==filled_data$interval[i],2]}
 } # End of loop
-
 ```
 
 
 4. Make a histogram of the total number of steps taken each day and calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
 
-```{r, echo=TRUE}
+
+```r
 # Will compute a histogram daily steps for database with replaced NA values (filled_data)
 
 # First, ensure that date values are of type character
@@ -120,14 +134,27 @@ filled_data$date <- as.character(filled_data$date)
 daily.steps.filled <- sapply(split(filled_data$steps,filled_data$date),sum)
 
 barplot(daily.steps.filled , xlab="Dates", ylab="Steps", col="red", main="Total steps by day using estitmated NA data")
+```
 
+![](PA1_template_files/figure-html/unnamed-chunk-8-1.png) 
+
+```r
 # Mean and median daily steps steps with rows with NA values updated with mean number of steps for the associated time interval 
 meansteps.filled <- mean(daily.steps.filled)
 mediansteps.filled <- median(daily.steps.filled)
 paste("The mean number of steps per day for the dataset with estimated values is ",round(meansteps.filled, digits=2), ", and the median is ", round(mediansteps.filled, digits=2),".",sep="")
+```
 
+```
+## [1] "The mean number of steps per day for the dataset with estimated values is 10766.19, and the median is 10766.19."
+```
+
+```r
 paste("The differences between the the two datasets (daily.steps - daily.steps.filled)  are mean difference equals ",round(meansteps-meansteps.filled, digits=2), ", and the median differnce equals ",round(mediansteps-mediansteps.filled, digits=2),".",sep="")
+```
 
+```
+## [1] "The differences between the the two datasets (daily.steps - daily.steps.filled)  are mean difference equals 0, and the median differnce equals -1.19."
 ```
 
 **Are there differences in activity patterns between weekdays and weekends?**
@@ -136,7 +163,8 @@ For this part the weekdays() function may be of some help here. Use the dataset 
 
 1. Create a new factor variable in the dataset with two levels – “weekday” and “weekend” indicating whether a given date is a weekday or weekend day.
 
-```{r, echo=TRUE}
+
+```r
 # Since the date columns for filled_data are of type character, will convert to type 'Date' 
 
 filled_data$date <- as.Date(filled_data$date, format = "%Y-%m-%d")
@@ -146,12 +174,12 @@ filled_data$date <- as.Date(filled_data$date, format = "%Y-%m-%d")
 daytype.filled <- weekdays(filled_data$date)=="Saturday"|weekdays(filled_data$date)=="Sunday"
 daytype.filled.f <- factor(daytype.filled, labels = c("weekday", "weekend"))
 filled_data$daytype <- daytype.filled.f
-
 ```
 
 2. Make a panel plot containing a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis). 
 
-```{r, echo=TRUE}
+
+```r
 # Will use the lattice plotting system to create the panel plot
 
 library(lattice)
@@ -174,5 +202,6 @@ mean.daytype.df <- data.frame(interval=c(x.axis, x.axis),
 # The plot below uses lattice, using the daytype factor to compare weekday and weekend data
 xyplot(interval.means ~ interval| daytype, data=mean.daytype.df,  
        layout = c(1, 2), type="l", xlab="Time interval", ylab="Average steps")
-
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-10-1.png) 
